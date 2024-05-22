@@ -451,9 +451,9 @@ double lj(struct vector vold, long cellold, struct vector vnew, long cellnew, do
     if (!shift) {
         // If using a truncated version, calculate shift
         if (ljTrunc > 0.0) {
-            shift_r = SQ(2.5);
+            shift_r = SQ(ljTrunc);
             shift = 4 * ( pow((1/shift_r),6) - pow((1/shift_r),3) );
-            critval2 = SQ(shift);
+            critval2 = shift_r;
         } else {
             shift = 0.0;
         }
