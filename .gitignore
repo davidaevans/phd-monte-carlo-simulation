@@ -1,9 +1,6 @@
 .vscode
 .DS_Store
 **/*.o
-data/config*
-data/trajectories
 source/mc
-data/defaults
-data/scripts
-data/potentials
+data/*
+!data/options-mc
