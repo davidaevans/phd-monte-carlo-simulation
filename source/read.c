@@ -171,6 +171,12 @@ void read_options(long *npart, long *ntot, struct vector *box, double *length,
             if (!get_double(&dipole_y)) die ("Could not read y component of dipole direction after DIPOLE");
             if (!get_double(dipole_strength)) die ("Could not read dipole strength after DIPOLE");
             if (!get_double(dipole_cutoff)) die ("Could not read dipole cutoff after DIPOLE");
+         } else if (strcmp(option, "STOCKMAYER") == 0) {
+            *potential = 10;
+            if (!get_double(&dipole_x)) die ("Could not read x component of dipole direction after STOCKMAYER");
+            if (!get_double(&dipole_y)) die ("Could not read y component of dipole direction after STOCKMAYER");
+            if (!get_double(dipole_strength)) die ("Could not read dipole strength after STOCKMAYER");
+            if (!get_double(dipole_cutoff)) die ("Could not read dipole cutoff after STOCKMAYER");
          } else{
             sprintf (error, "Unrecognised option after POTENTIAL keyword: %s", option);
             die (error);
@@ -304,6 +310,11 @@ void read_options(long *npart, long *ntot, struct vector *box, double *length,
       printf (" Potential:                                %s\n", "SPLIT (active) reading from file potential.dat");
    } else if (*potential == 9) {
       printf (" Potential:                                %s\n", "ALIGNED DIPOLE");
+      printf ("    Dipole direction:                      (%.6lf, %.6lf)\n", fixed_dipole->x, fixed_dipole->y);
+      printf ("    Dipole strength:                       %lf\n", *dipole_strength);
+      printf ("    Dipole cutoff:                         %lf\n", *dipole_cutoff);
+   } else if (*potential == 9) {
+      printf (" Potential:                                %s\n", "ALIGNED STOCKMAYER");
       printf ("    Dipole direction:                      (%.6lf, %.6lf)\n", fixed_dipole->x, fixed_dipole->y);
       printf ("    Dipole strength:                       %lf\n", *dipole_strength);
       printf ("    Dipole cutoff:                         %lf\n", *dipole_cutoff);

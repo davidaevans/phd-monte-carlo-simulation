@@ -359,14 +359,11 @@ double externalpotential(struct vector vold, long cellold, struct vector vnew, l
     struct vector r_cm;
 
     double energyold, energynew, deltaE;
-    double diameter2;
     double r;
-    double critval, critval2, tmp;
+    double critval, critval2;
     //int boolflag = 0;
 
     energyold = energynew = deltaE = 0;
-
-    diameter2 = SQ(diameter);
 
     // Critical value is given by the maximum distance in the loaded potential
     critval = extPotential[extPotentialLength-1][0];
@@ -441,9 +438,8 @@ double lj(struct vector vold, long cellold, struct vector vnew, long cellnew, do
     struct vector r_cm;
 
     double energyold, energynew, deltaE;
-    double diameter2;
     double r, shift_r;
-    double critval, critval2, tmp;
+    double critval2;
     static double shift;
     
     // Set cutoff to be 5 times diameter to match cell size
@@ -531,9 +527,7 @@ double yukawa(struct vector vold, long cellold, struct vector vnew, long cellnew
     struct vector r_cm;
 
     double energyold, energynew, deltaE;
-    double diameter2;
     double r;
-    double critval, critval2, tmp;
 
     energyold = energynew = deltaE = 0;
     
@@ -722,7 +716,7 @@ double aligned_dipole(struct vector vold, long cellold, struct vector vnew, long
     struct disc *test;
     struct vector r_cm;
 
-    double energyold, energynew, tmp_energy;
+    double energyold, energynew;
     double r;
     double critval, critval2;
 
@@ -805,6 +799,97 @@ double aligned_dipole(struct vector vold, long cellold, struct vector vnew, long
     //return energy difference
     return energynew - energyold;
 }
+
+double stockmayer(struct vector vold, long cellold, struct vector vnew, long cellnew, double diameter,
+           struct disc **cfirst, long **neighbour, struct vector box, struct disc *particle, 
+           long testp, double dipole_strength, double dipole_cutoff) {
+
+
+    long *cell;
+    struct disc *test;
+    struct vector r_cm;
+
+    double energyold, energynew;
+    double r;
+    double critval, critval2;
+
+    energyold = energynew = 0;
+
+    critval = dipole_cutoff;
+    critval2 = SQ(critval);
+    
+    //absolute energy of old config
+    /* Loop over all cells adjacent to particle */
+    cell = &neighbour[cellold][0];
+    while (*cell >= 0) {
+        /* Loop over all particles in cell */
+        test = cfirst[*cell];
+        while (test) {
+
+            if (testp != test->idx) {
+                //printf("test: %ld\ntestp: %ld\n", test->idx, testp);
+                r_cm = image(vold, test->pos, box);
+                //printf("tx: %lf, ty: %lf\n", test->pos.x, test->pos.y);
+                //printf("vx: %lf, vy: %lf\n", vold.x, vold.y);
+                //printf("px: %lf, py: %lf\n", particle[testp].pos.x, particle[testp].pos.y);
+                //printf("dx: %lf, dy: %lf\n", r_cm.x, r_cm.y);
+                //calculate pair energy contribution
+                r = DOT(r_cm, r_cm);
+                //printf("r: %lf\n", r);
+                if (r <= critval2) {
+                    
+                    // Lennard Jones contribution
+                    energyold += 4 * ( pow((1/r),6) - pow((1/r),3) );
+
+                    // Dipole contribution
+                    energyold += SQ(dipole_strength) * CUBE(diameter) / CUBE(sqrt(r)) * ( DOT(particle[testp].dir, test->dir) - 3.0/r * DOT(particle[testp].dir, r_cm) * DOT(test->dir, r_cm));
+                    // tmp_energy = SQ(dipole_strength) * CUBE(diameter) / CUBE(sqrt(r)) * ( DOT(particle[testp].dir, test->dir) - 3.0/r * DOT(particle[testp].dir, r_cm) * DOT(test->dir, r_cm));
+                    // printf("strength: %lf diameter: %lf r: %lf\n", dipole_strength, diameter, sqrt(r));
+                    // printf("testp -> x: %lf y: %lf dir_x: %lf dir_y: %lf\n", particle[testp].pos.x, particle[testp].pos.y, particle[testp].dir.x, particle[testp].dir.y);
+                    // printf("insrt -> x: %lf y: %lf dir_x: %lf dir_y: %lf\n", test->pos.x, test->pos.y, test->dir.x, test->dir.y);
+                    // printf("r_cm  -> x: %lf y: %lf\n", r_cm.x, r_cm.y);
+                    // printf("energy: %lf\n", tmp_energy);
+                }
+            }
+
+        test = test->next;
+        }  /* End of loop over particles in adjacent cell */
+
+        cell++;
+    }  /* End of loop of adjacent cells */    
+    //printf("eo: %lf\n", energyold);
+    //absolute energy of new config
+    /* Loop over all cells adjacent to particle */
+    cell = &neighbour[cellnew][0];
+    while (*cell >= 0) {
+        /* Loop over all particles in cell */
+        test = cfirst[*cell];
+        while (test) {
+
+            if (testp != test->idx) {
+                r_cm = image(vnew, test->pos, box);
+                //calculate pair energy contribution
+                r = DOT(r_cm, r_cm);
+                
+                if (r <= critval2) {
+                    //Lennard-Jones contribution
+                    energynew += 4 * ( pow((1/r),6) - pow((1/r),3) );
+                    // Dipole contribution
+                    energynew += SQ(dipole_strength) * CUBE(diameter) / CUBE(sqrt(r)) * ( DOT(particle[testp].dir, test->dir) - 3.0/r * DOT(particle[testp].dir, r_cm) * DOT(test->dir, r_cm));
+                }
+            }
+
+        test = test->next;
+        }  /* End of loop over particles in adjacent cell */
+
+        cell++;
+    }  /* End of loop of adjacent cells */   
+    //printf("en: %lf\n", energynew);
+    //return energy difference
+    return energynew - energyold;
+}
+
+
 
 
 void checkWCA() {

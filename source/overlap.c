@@ -201,6 +201,12 @@ int decision(struct vector vold, long oldcell, struct disc *particle,
       }
 
       return metropolis(deltaE, kt);
+   
+   } else if (potential == 10) {
+      deltaE = stockmayer(vold, oldcell, vnew, newcell, diameter, cfirst, neighbour,
+                          box, particle, testp, dipole_strength, dipole_cutoff);
+
+      return metropolis(deltaE, kt);
 
    } else {
       die("Decision() not made. Potential not selected.");

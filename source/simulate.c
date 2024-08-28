@@ -50,6 +50,7 @@ void simulate(long ntot, long *npart, struct vector box, double *length,
    if (potential == 7) *potshortname = "yuk";
    if (potential == 8) *potshortname = "mix";
    if (potential == 9) *potshortname = "dip";
+   if (potential == 10) *potshortname = "sto";
    sprintf(dumpfilename, "configs-%s-%.1lfx%.1lf-npart_%ld.dat", *potshortname, box.x, box.y, ntot);
 
    /*=== Initialise cell list on first call ===*/
@@ -82,7 +83,7 @@ void simulate(long ntot, long *npart, struct vector box, double *length,
          if (cutoff_phs > denom) denom = cutoff_phs;
          if (extPotential[extPotentialLength-1][0] > denom) denom = extPotential[extPotentialLength-1][0];
       }
-      if (potential == 9) denom = dipole_cutoff;
+      if (potential == 9 || potential == 10) denom = dipole_cutoff;
       ncellx = (long)(box.x / (denom));
       ncelly = (long)(box.y / (denom));
       ncells = ncellx * ncelly;

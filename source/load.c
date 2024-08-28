@@ -96,3 +96,41 @@ void load_potential(double **extPotential, long extPotentialLength, double *extP
     *extPotentialSpacing = extPotential[1][0] - *extPotentialR0;
 
 }
+
+void load_2D_potential(FILE *potential_file, double **potential, long nbins_r, long nbins_theta, double *dr, double *dtheta) {
+    
+    long i, j; // Iterators
+    double tmp_r, tmp_theta, tmp_V; // Temporary variables for reading in values
+    double r0, r1, t0, t1;
+    
+    *dr = *dtheta = 0.0;
+    r0 = r1 = t0 = t1 = 0.0;
+
+    for (i = 0; i < nbins_r; i++) {
+        for (j = 0; j < nbins_theta; j++) {
+            if (read_line(potential_file)) {
+                if (!get_double(&tmp_r)) die ("Could not read r value of potential");
+                if (!get_double(&tmp_theta)) die ("Could not read r value of potential");
+                if (!get_double(&tmp_V)) die ("Could not read r value of potential");
+
+                potential[i][j] = tmp_V;
+
+                if (i == 0) {r0 = tmp_r;}
+                if (i == 1) {r1 = tmp_r;}
+                if (j == 0) {t0 = tmp_theta;}
+                if (j == 1) {t1 = tmp_theta;}
+
+            } else {
+                die("Error reading line in potential file - load_2D_potential\n");
+            }
+        }
+    }
+
+    *dr = r1 - r0;
+    *dtheta = t1 - t0;
+    if (*dr < 0.0001) {die ("dr too small");}
+    if (*dtheta < 0.1) {die ("dtheta too small");}
+
+    printf("dr: %lf dtheta: %lf\n", *dr, *dtheta);
+
+}

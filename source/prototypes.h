@@ -155,6 +155,11 @@ double aligned_dipole(struct vector vold, long cellold, struct vector vnew, long
            struct disc **cfirst, long **neighbour, struct vector box, struct disc *particle, 
            long testp, double dipole_strength, double dipole_cutoff);
 
+
+double stockmayer(struct vector vold, long cellold, struct vector vnew, long cellnew, double diameter,
+           struct disc **cfirst, long **neighbour, struct vector box, struct disc *particle, 
+           long testp, double dipole_strength, double dipole_cutoff);
+
 /* Prototypes for keywords library */
 int  read_line(FILE *);
 int  get_string(char [], int);
