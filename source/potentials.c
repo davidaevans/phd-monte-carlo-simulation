@@ -711,7 +711,7 @@ double aligned_dipole(struct vector vold, long cellold, struct vector vnew, long
            struct disc **cfirst, long **neighbour, struct vector box, struct disc *particle, 
            long testp, double dipole_strength, double dipole_cutoff) {
 
-
+    // aligned dipoles with wca repulsion
     long *cell;
     struct disc *test;
     struct vector r_cm;
@@ -719,12 +719,19 @@ double aligned_dipole(struct vector vold, long cellold, struct vector vnew, long
     double energyold, energynew;
     double r;
     double critval, critval2;
+    double wca_critval, wca_critval2;
+    double diameter2;
 
     energyold = energynew = 0;
 
     critval = dipole_cutoff;
     critval2 = SQ(critval);
+
+    wca_critval = pow(2.0,(1.0/6.0)) * diameter;
+    wca_critval2 = SQ(wca_critval);
     
+    diameter2 =  SQ(diameter);
+
     //absolute energy of old config
     /* Loop over all cells adjacent to particle */
     cell = &neighbour[cellold][0];
@@ -749,8 +756,11 @@ double aligned_dipole(struct vector vold, long cellold, struct vector vnew, long
                 r = DOT(r_cm, r_cm);
                 //printf("r: %lf\n", r);
                 if (r <= critval2) {
-                    
-                    // energyold += SQ(dipole_strength) * CUBE(diameter) / CUBE(sqrt(r)) * ( DOT(particle[testp].dir, test->dir) - 3.0/r * DOT(particle[testp].dir, particle[testp].pos) * DOT(test->dir, test->pos));
+                    // WCA component
+                    if (r <= wca_critval2){
+                        energyold += 4 * (pow((diameter2/r), 6) - pow((diameter2/r), 3)) + 1;
+                    }
+                    // Dipole component
                     energyold += SQ(dipole_strength) * CUBE(diameter) / CUBE(sqrt(r)) * ( DOT(particle[testp].dir, test->dir) - 3.0/r * DOT(particle[testp].dir, r_cm) * DOT(test->dir, r_cm));
                     // tmp_energy = SQ(dipole_strength) * CUBE(diameter) / CUBE(sqrt(r)) * ( DOT(particle[testp].dir, test->dir) - 3.0/r * DOT(particle[testp].dir, r_cm) * DOT(test->dir, r_cm));
                     // printf("strength: %lf diameter: %lf r: %lf\n", dipole_strength, diameter, sqrt(r));
@@ -785,7 +795,12 @@ double aligned_dipole(struct vector vold, long cellold, struct vector vnew, long
                 }
                 
                 if (r <= critval2) {
-                    // energynew += SQ(dipole_strength) * CUBE(diameter) / CUBE(sqrt(r)) * ( DOT(particle[testp].dir, test->dir) - 3.0/r * DOT(particle[testp].dir, particle[testp].pos) * DOT(test->dir, test->pos));
+
+                    // WCA component
+                    if (r <= wca_critval2){
+                        energynew += 4 * (pow((diameter2/r), 6) - pow((diameter2/r), 3)) + 1;
+                    }
+                    // Dipole component
                     energynew += SQ(dipole_strength) * CUBE(diameter) / CUBE(sqrt(r)) * ( DOT(particle[testp].dir, test->dir) - 3.0/r * DOT(particle[testp].dir, r_cm) * DOT(test->dir, r_cm));
                 }
             }

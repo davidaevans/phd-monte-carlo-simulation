@@ -1,6 +1,6 @@
 initial generate
 box 20.0 20.0
-potential stockmayer 1 0 1 5
+potential dipole 1 0 1 5
 kt 1
 length 1.0 1.0
 discs 200 0
