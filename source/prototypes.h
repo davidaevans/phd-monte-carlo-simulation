@@ -171,3 +171,5 @@ int  get_double(double *);
 void checkWCA();
 
 void checkLJPotential();
+
+double get_angle(struct vector r_cm);

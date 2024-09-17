@@ -711,16 +711,18 @@ double aligned_dipole(struct vector vold, long cellold, struct vector vnew, long
            struct disc **cfirst, long **neighbour, struct vector box, struct disc *particle, 
            long testp, double dipole_strength, double dipole_cutoff) {
 
-    // aligned dipoles with wca repulsion
+    // aligned dipoles with wca repulsion truncated and shifted at given value
     long *cell;
     struct disc *test;
-    struct vector r_cm;
+    struct vector r_cm, r_cutoff;
 
     double energyold, energynew;
     double r;
     double critval, critval2;
     double wca_critval, wca_critval2;
     double diameter2;
+    double shift;
+    double tmp_angle;
 
     energyold = energynew = 0;
 
@@ -748,10 +750,6 @@ double aligned_dipole(struct vector vold, long cellold, struct vector vnew, long
                 //printf("px: %lf, py: %lf\n", particle[testp].pos.x, particle[testp].pos.y);
                 //printf("dx: %lf, dy: %lf\n", r_cm.x, r_cm.y);
 
-                //if there is overlap between hard cores, can immediately reject
-                //although there shouldn't be overlap in the old configuration,
-                //double check just in case
-                if (overlap(r_cm, diameter, test->diameter,1)) return NAN;
                 //calculate pair energy contribution
                 r = DOT(r_cm, r_cm);
                 //printf("r: %lf\n", r);
@@ -762,6 +760,14 @@ double aligned_dipole(struct vector vold, long cellold, struct vector vnew, long
                     }
                     // Dipole component
                     energyold += SQ(dipole_strength) * CUBE(diameter) / CUBE(sqrt(r)) * ( DOT(particle[testp].dir, test->dir) - 3.0/r * DOT(particle[testp].dir, r_cm) * DOT(test->dir, r_cm));
+
+                    tmp_angle = get_angle(r_cm);
+                    r_cutoff.x = dipole_cutoff * cos(tmp_angle);
+                    r_cutoff.y = dipole_cutoff * sin(tmp_angle);
+
+                    // Shift potential at truncated value
+                    energyold -= SQ(dipole_strength) * CUBE(diameter) / CUBE(dipole_cutoff) * ( DOT(particle[testp].dir, test->dir) - 3.0/r * DOT(particle[testp].dir, r_cutoff) * DOT(test->dir, r_cutoff));
+                    
                     // tmp_energy = SQ(dipole_strength) * CUBE(diameter) / CUBE(sqrt(r)) * ( DOT(particle[testp].dir, test->dir) - 3.0/r * DOT(particle[testp].dir, r_cm) * DOT(test->dir, r_cm));
                     // printf("strength: %lf diameter: %lf r: %lf\n", dipole_strength, diameter, sqrt(r));
                     // printf("testp -> x: %lf y: %lf dir_x: %lf dir_y: %lf\n", particle[testp].pos.x, particle[testp].pos.y, particle[testp].dir.x, particle[testp].dir.y);
@@ -789,10 +795,6 @@ double aligned_dipole(struct vector vold, long cellold, struct vector vnew, long
                 r_cm = image(vnew, test->pos, box);
                 //calculate pair energy contribution
                 r = DOT(r_cm, r_cm);
-                //immediately reject if there is hardcore overlap
-                if (overlap(r_cm, diameter, test->diameter,1)) {
-                    return NAN;
-                }
                 
                 if (r <= critval2) {
 
@@ -802,6 +804,14 @@ double aligned_dipole(struct vector vold, long cellold, struct vector vnew, long
                     }
                     // Dipole component
                     energynew += SQ(dipole_strength) * CUBE(diameter) / CUBE(sqrt(r)) * ( DOT(particle[testp].dir, test->dir) - 3.0/r * DOT(particle[testp].dir, r_cm) * DOT(test->dir, r_cm));
+
+                    // Truncated and shifted at dipole cutoff
+                    tmp_angle = get_angle(r_cm);
+                    r_cutoff.x = dipole_cutoff * cos(tmp_angle);
+                    r_cutoff.y = dipole_cutoff * sin(tmp_angle);
+
+                    // Shift potential at truncated value
+                    energynew -= SQ(dipole_strength) * CUBE(diameter) / CUBE(dipole_cutoff) * ( DOT(particle[testp].dir, test->dir) - 3.0/r * DOT(particle[testp].dir, r_cutoff) * DOT(test->dir, r_cutoff));
                 }
             }
 

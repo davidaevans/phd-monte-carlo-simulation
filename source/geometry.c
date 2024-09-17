@@ -31,7 +31,26 @@ void normalise(struct vector *u)
 }
 
 /*..............................................................................*/
+/*
+Returns angle from x axis of given vector
+*/
+double get_angle(struct vector r_cm) {
+    double tmp_angle;
+    if (r_cm.x == 0.0) {
+        tmp_angle = atan(r_cm.y);
+    } else {
+        tmp_angle = atan(r_cm.y/r_cm.x);
+    }
 
+    // Adjust angle based on vector to give correct value
+    if (r_cm.x < 0.0) {tmp_angle += M_PI;}
+    else if( r_cm.y < 0.0) {tmp_angle += 2 * M_PI;}
+    else {tmp_angle = tmp_angle;}
+
+    return tmp_angle;
+}
+
+/*..............................................................................*/
 /* 
 Return area of disc
 */
