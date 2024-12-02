@@ -759,14 +759,14 @@ double aligned_dipole(struct vector vold, long cellold, struct vector vnew, long
                         energyold += 4 * (pow((diameter2/r), 6) - pow((diameter2/r), 3)) + 1;
                     }
                     // Dipole component
-                    energyold += SQ(dipole_strength) * CUBE(diameter) / CUBE(sqrt(r)) * ( DOT(particle[testp].dir, test->dir) - 3.0/r * DOT(particle[testp].dir, r_cm) * DOT(test->dir, r_cm));
+                    energyold += SQ(dipole_strength) * CUBE(diameter) / CUBE(r) * ( DOT(particle[testp].dir, test->dir) - 3.0/r * DOT(particle[testp].dir, r_cm) * DOT(test->dir, r_cm));
 
                     tmp_angle = get_angle(r_cm);
                     r_cutoff.x = dipole_cutoff * cos(tmp_angle);
                     r_cutoff.y = dipole_cutoff * sin(tmp_angle);
 
                     // Shift potential at truncated value
-                    energyold -= SQ(dipole_strength) * CUBE(diameter) / CUBE(dipole_cutoff) * ( DOT(particle[testp].dir, test->dir) - 3.0/SQ(dipole_cutoff) * DOT(particle[testp].dir, r_cutoff) * DOT(test->dir, r_cutoff));
+                    energyold -= SQ(dipole_strength) * CUBE(diameter) / CUBE(SQ(dipole_cutoff)) * ( DOT(particle[testp].dir, test->dir) - 3.0/SQ(dipole_cutoff) * DOT(particle[testp].dir, r_cutoff) * DOT(test->dir, r_cutoff));
                     
                     // tmp_energy = SQ(dipole_strength) * CUBE(diameter) / CUBE(sqrt(r)) * ( DOT(particle[testp].dir, test->dir) - 3.0/r * DOT(particle[testp].dir, r_cm) * DOT(test->dir, r_cm));
                     // printf("strength: %lf diameter: %lf r: %lf\n", dipole_strength, diameter, sqrt(r));
@@ -803,7 +803,7 @@ double aligned_dipole(struct vector vold, long cellold, struct vector vnew, long
                         energynew += 4 * (pow((diameter2/r), 6) - pow((diameter2/r), 3)) + 1;
                     }
                     // Dipole component
-                    energynew += SQ(dipole_strength) * CUBE(diameter) / CUBE(sqrt(r)) * ( DOT(particle[testp].dir, test->dir) - 3.0/r * DOT(particle[testp].dir, r_cm) * DOT(test->dir, r_cm));
+                    energynew += SQ(dipole_strength) * CUBE(diameter) / CUBE(r) * ( DOT(particle[testp].dir, test->dir) - 3.0/r * DOT(particle[testp].dir, r_cm) * DOT(test->dir, r_cm));
 
                     // Truncated and shifted at dipole cutoff
                     tmp_angle = get_angle(r_cm);
@@ -811,7 +811,7 @@ double aligned_dipole(struct vector vold, long cellold, struct vector vnew, long
                     r_cutoff.y = dipole_cutoff * sin(tmp_angle);
 
                     // Shift potential at truncated value
-                    energynew -= SQ(dipole_strength) * CUBE(diameter) / CUBE(dipole_cutoff) * ( DOT(particle[testp].dir, test->dir) - 3.0/SQ(dipole_cutoff) * DOT(particle[testp].dir, r_cutoff) * DOT(test->dir, r_cutoff));
+                    energynew -= SQ(dipole_strength) * CUBE(diameter) / CUBE(SQ(dipole_cutoff)) * ( DOT(particle[testp].dir, test->dir) - 3.0/SQ(dipole_cutoff) * DOT(particle[testp].dir, r_cutoff) * DOT(test->dir, r_cutoff));
                 }
             }
 
